@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ルーター・ファームウェア脆弱性シミュレーター | 社会情報学実習</title>
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style.css?v=2">
 </head>
 <body>
 <header class="app-header">
@@ -155,8 +155,10 @@
   社会情報学実習 #1 サイバーセキュリティ &mdash; 教育目的のオフライン・シミュレーター
 </footer>
 
-<script src="js/firmwares.js" charset="utf-8"></script>
-<script src="js/attacks.js" charset="utf-8"></script>
-<script src="js/app.js" charset="utf-8"></script>
+<!-- ?v=○ はキャッシュ対策。CSS/JS を更新したら、この数字(と上のCSSの数字)を1つ増やすと、
+     閲覧者のブラウザに最新版が確実に届きます（古い版の混在による不具合を防止）。 -->
+<script src="js/firmwares.js?v=2" charset="utf-8"></script>
+<script src="js/attacks.js?v=2" charset="utf-8"></script>
+<script src="js/app.js?v=2" charset="utf-8"></script>
 </body>
 </html>
