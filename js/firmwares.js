@@ -120,6 +120,22 @@ const FIRMWARES = [
       authEnforced:true, sercomm:false, romPager:false, upnpWan:false,
       fwSigned:true, autoUpdate:true, wifi:"WPA3"
     }
+  },
+  {
+    id: "fw2026",
+    year: 2026,
+    version: "FW v7.0",
+    codename: "最新 (2026)",
+    ip: "192.168.11.1",
+    model: "BBRouter BE-700 (模擬)",
+    summary: "現時点の最善。WPA3 Release 3 でWi-Fi設計の穴(SSID Confusion)も塞ぎ始めた。一方で、管理UIのメモリ破壊によるRCEなど『2024年以降に主流化した脆弱性クラス』は最新機でも完全には消えていない。",
+    risk: 0.08,
+    flags: {
+      httpAdmin:"https", creds:"unique", telnet:"removed", wps:"removed",
+      diagSanitized:true, csrfToken:true, sameSite:true, pathTraversal:false,
+      authEnforced:true, sercomm:false, romPager:false, upnpWan:false,
+      fwSigned:true, autoUpdate:true, wifi:"WPA3"
+    }
   }
 ];
 

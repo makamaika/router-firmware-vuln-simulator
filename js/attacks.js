@@ -434,5 +434,100 @@ const ATTACKS = [
           {t:"block",s:`セキュアブートにより未署名/改ざんファームは起動しない`}
         ]};
     }
+  },
+
+  /* ===== ここから 2024年以降に主流化した脆弱性クラス ===== */
+
+  /* ---------------------------------------------------------------- */
+  {
+    id:"webui-rce", icon:"🧨", category:"メモリ破壊",
+    name:"管理UIのバッファオーバーフロー→RCE", nameEn:"Web UI Buffer Overflow RCE",
+    year:"2024〜", cve:"CVE-2024-41592 ほか",
+    incident:"2024年、DrayTek Vigorルーターの14件(DRAY:BREAK)を含め、管理画面(Web UI)のメモリ破壊でRCEに至る例が続出。CVE-2024-41592はWeb UIのGetCGI処理のバッファオーバーフローでCVSS 10.0。Web UI露出機が70万台超。初期パスワードやTelnetを潰した“現代機”でも、C言語実装のメモリ安全性の穴は残り続ける。",
+    idea:"フォームやクエリ文字列を処理する関数が、長すぎる入力でメモリを溢れさせる。これを精密に操ってルーター上で任意コード実行(RCE)。設定ミスではなく実装(メモリ安全性)の問題。",
+    mitigation:"メモリ安全な言語(Rust等)への移行、ASLR/スタックカナリア等の緩和、Fuzzingでの事前検出、迅速なパッチ。",
+    evaluate(fw){
+      if(fw.year <= 2016) return {status:"success",
+        headline:"古い管理UIはオーバーフローで容易にRCE",
+        why:"緩和策の乏しい古いC実装では、長い入力でメモリを破壊して任意コード実行に持ち込みやすい。歴史的にルーターのRCE報告が最も多いクラス。",
+        console:[
+          {t:"cmd",s:`curl "http://${fw.ip}/cgi-bin/form" --data-binary @long_input.bin`},
+          {t:"out",s:`httpd: stack smashing detected — Segmentation fault`},
+          {t:"ok",s:`戻りアドレスを上書き → 任意コード実行 (uid=0)`}
+        ]};
+      return {status:"partial",
+        headline:"緩和策で難度は上がるが、RCEクラスは現役",
+        why:"ASLRやセキュアブート等で悪用の難度は上がる。しかし2024年のDrayTek(CVSS 10.0)のように、現代機でも管理UIのメモリ破壊によるRCEは現実に発生している＝“新品でも無敵ではない”。",
+        console:[
+          {t:"cmd",s:`# 管理UIのパーサに長大な入力を投入(再現)`},
+          {t:"out",s:`ASLR/canary 有効 — 単純な上書きは失敗`},
+          {t:"warn",s:`情報漏えいと連鎖した精密攻撃なら成立例あり (例: CVE-2024-41592)`}
+        ]};
+    }
+  },
+
+  /* ---------------------------------------------------------------- */
+  {
+    id:"ssid-confusion", icon:"🪪", category:"無線",
+    name:"SSID Confusion (Wi-Fiダウングレード)", nameEn:"SSID Confusion",
+    year:"2024", cve:"CVE-2023-52424",
+    incident:"2024年公開。IEEE 802.11の設計上の欠陥で、4-wayハンドシェイクでSSIDが保護されない点を突き、信頼済みSSIDになりすまして“より弱い網”へ誘導(ダウングレード)し盗聴できる。WEP/WPA2に加え、WPA3でも特定の任意モードが対象。",
+    idea:"接続先の判断材料であるSSIDが鍵導出に必ずしも縛られていないため、攻撃者が別ネットの名前を詐称し、被害者を意図しない弱い設定へ繋がせてMITMする。",
+    mitigation:"Beacon Protection / SSIDを鍵導出に束縛する仕様(WPA3 Release 3)、SSIDごとに資格情報を使い回さない。",
+    evaluate(fw){
+      if(fw.flags.wifi==="WEP") return {status:"na",
+        headline:"WEP網は先に暗号自体が破れるため対象外",
+        why:"この年代はWEPが数分で解読される。SSID Confusion以前に無線が破られており、評価対象として意味を持たない。",
+        console:[{t:"out",s:`WEP網 — 先に暗号自体が解読される(本攻撃の前提外)`}]};
+      if(fw.year >= 2026) return {status:"failed",
+        headline:"Beacon Protection等の対策で不成立",
+        why:"最新世代はSSIDを鍵導出に束縛する仕様(WPA3 Release 3 / Beacon Protection)を採り、SSID詐称によるダウングレードを拒否する。",
+        console:[
+          {t:"cmd",s:`# 信頼SSIDを詐称してダウングレード誘導(再現)`},
+          {t:"block",s:`SSIDが鍵に束縛され、なりすまし網への移行を拒否`}
+        ]};
+      return {status:"partial",
+        headline:"条件は要るが、SSID詐称でダウングレード可能",
+        why:"攻撃者が電波到達範囲にいて、被害者が複数SSIDで資格情報を使い回す等の条件下で、信頼SSIDを詐称し弱い網へ誘導してMITMできる。設計上の穴のため機器更新だけでは塞がりにくい。",
+        console:[
+          {t:"cmd",s:`# rogue AP で信頼SSIDを詐称(再現)`},
+          {t:"warn",s:`被害者を弱い設定の網へダウングレード → 通信を傍受`}
+        ]};
+    }
+  },
+
+  /* ---------------------------------------------------------------- */
+  {
+    id:"eol-nday", icon:"🪦", category:"運用",
+    name:"サポート終了(EOL)機器のn-day悪用", nameEn:"End-of-Life n-day Exploitation",
+    year:"2024-2026に深刻化", cve:"既知CVEの放置",
+    incident:"2026年現在、攻撃の主戦場は“設計が古い”より“更新が止まった”機器。公開済みの既知脆弱性(n-day)が永遠に直らず、EOL機が大規模に乗っ取られる。例: 2026年に実攻撃中のD-Link旧DSL(CVE-2026-0625)、TP-Link旧機を束ねるQuad7、各種を薙ぎ倒すRondoDox、国家関与が古いSOHOルーターを踏み台化するVolt Typhoon等。",
+    idea:"発売から年数が経ちサポートが切れた機器は、既知の穴が塞がれない。攻撃者は公開エクスプロイトを当てるだけでよく、無人で大量感染させられる。",
+    mitigation:"サポート期間内の機器を使う/EOLになったら買い替える、自動更新、ISP配布機の計画的更改。",
+    evaluate(fw){
+      const age = 2026 - fw.year;
+      if(age >= 8) return {status:"success",
+        headline:`発売から約${age}年・サポート終了 → 既知の穴を当てるだけ`,
+        why:"とうにサポートが切れ、既知脆弱性が放置されている。攻撃者は公開済みエクスプロイトを当てるだけで乗っ取れる。2026年のボットネットの主な餌食はこの層。",
+        console:[
+          {t:"cmd",s:`# 既知CVEの公開エクスプロイトを適用(再現)`},
+          {t:"out",s:`target firmware: ${fw.year}年世代 (EOL)`},
+          {t:"ok",s:`未修正のn-dayが刺さり、ボットネットへ自動編入`}
+        ]};
+      if(age >= 5) return {status:"partial",
+        headline:`発売から約${age}年 — サポート終了が近く危険域`,
+        why:"サポートが切れかけ、または一部終了。新規の修正が届きにくく、既知脆弱性が残っている可能性が高い。買い替え推奨の領域。",
+        console:[
+          {t:"warn",s:`firmware: ${fw.year}年世代 — 更新提供が細る時期`},
+          {t:"warn",s:`未修正の既知脆弱性が残っていれば悪用され得る`}
+        ]};
+      return {status:"failed",
+        headline:`発売から約${age}年・サポート内 → 速やかに修正される`,
+        why:"まだサポート期間内で、既知脆弱性は更新で塞がれる。自動更新が効いていれば、n-day悪用の窓は短い。",
+        console:[
+          {t:"out",s:`firmware: ${fw.year}年世代 (サポート内)`},
+          {t:"block",s:`既知脆弱性は更新で修正済み — 放置による感染は起きにくい`}
+        ]};
+    }
   }
 ];

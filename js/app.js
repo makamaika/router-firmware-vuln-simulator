@@ -254,7 +254,8 @@ const HISTORY = [
   {y:"2016", h:"Mirai → 大規模DDoS", d:"初期パスワードのIoTをTelnetで乗っ取るワーム。DNS事業者Dynが落ち主要Webが一斉ダウン。“出荷時設定の甘さ”の象徴。"},
   {y:"2017", h:"KRACK", d:"WPA2の鍵再インストールの脆弱性。広く使われた暗号も実装次第で揺らぐと示された。"},
   {y:"2018-20", h:"WPA3 / 初期パスワード規制", d:"WPA3(SAE)がオフライン辞書攻撃に耐性。米SB-327等で共通初期パスワードが事実上禁止に。自動更新も標準化。"},
-  {y:"現在", h:"署名検証・セキュアブート", d:"信頼の起点をハードに置き、正規ファームしか起動させない。歴史的手法の大半が成立しない世代へ。"}
+  {y:"2022-23", h:"署名検証・セキュアブートが標準化", d:"信頼の起点をハードに置き、正規ファームしか起動させない。歴史的手法の大半が成立しない世代へ。"},
+  {y:"2024-26", h:"脆弱性の“主役交代”", d:"初期パスワード等は新品で概ね解決。代わりに管理UIのメモリ破壊RCE(DrayTek DRAY:BREAK/CVSS10)、根強いコマンド注入、EOL機の放置によるボットネット(Quad7/RondoDox)、国家関与のSOHO踏み台化、Wi-Fi設計の穴(SSID Confusion)が前面に。"}
 ];
 
 function renderLearn(){
@@ -276,6 +277,19 @@ function renderLearn(){
       `<h3>ハッカー文化から家庭用ルーターへ ― 年表</h3>`+
       `<p class="sub">本日の授業（Levy『ハッカーズ』/ MIT / フリーキング）から、ルーター・セキュリティの歴史へつなげた流れ</p>`+
       `<ul class="timeline">${tl}</ul>`+
+    `</div>`+
+    `<div class="learn-card">`+
+      `<h3>2024年以降：脆弱性の“かたち”の変化</h3>`+
+      `<p class="sub">古い問題は新品では概ね解決。しかし主役が入れ替わり、“現代機＝無敵”ではない。</p>`+
+      `<div class="deep-grid">`+
+        `<div class="deep"><div class="dh"><span class="ico">✅</span>ほぼ解決済み（新品）</div>`+
+          `<p>初期パスワード / Telnet / WEP / WPS / RomPager系。出荷時設定の底上げと法規制で、歴史的手口は新品では通りにくい。</p></div>`+
+        `<div class="deep"><div class="dh"><span class="ico">🔥</span>未解決・新たな主流</div>`+
+          `<p>① 管理UIのメモリ破壊→RCE　② コマンドインジェクション(依然トップ級)　③ EOL機器の放置→ボットネット　④ 国家関与のSOHO踏み台化　⑤ Wi-Fi設計の穴(SSID Confusion)。</p></div>`+
+        `<div class="deep"><div class="dh"><span class="ico">🧾</span>代表例 (2024-2026)</div>`+
+          `<p>DrayTek DRAY:BREAK / CVE-2024-41592 (CVSS10)、D-Link旧DSL CVE-2026-0625 (実攻撃中)、TP-Link Quad7、RondoDox、SSID Confusion / CVE-2023-52424、Volt Typhoon。</p>`+
+          `<span class="tag">更新の価値は2026年も健在</span></div>`+
+      `</div>`+
     `</div>`+
     `<div class="learn-card">`+
       `<h3>攻撃手法ひとつずつ ― 仕組み・実例・対策</h3>`+
