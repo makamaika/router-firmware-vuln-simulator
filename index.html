@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ルーター・ファームウェア脆弱性シミュレーター | 社会情報学実習</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="app-header">
+  <div class="brand">
+    <div class="brand-logo">RT&#9889;</div>
+    <div class="brand-text">
+      <h1>ルーター・ファームウェア脆弱性シミュレーター</h1>
+      <p class="subtitle">年代別ファームウェアに、歴史上有名な攻撃手法を試して結果を観察する教育用サンドボックス</p>
+    </div>
+  </div>
+  <div class="safety-badge" title="このアプリはブラウザ内だけで完結する模擬実験です。実機・実ネットワークには一切アクセスしません。">
+    <span class="dot"></span>
+    <div>
+      <strong>OFFLINE SIMULATION</strong>
+      <small>実機・実通信なし / 技適・漏洩リスクなし</small>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button class="tab active" data-tab="sim">シミュレーター</button>
+  <button class="tab" data-tab="matrix">年代 &times; 攻撃マトリクス</button>
+  <button class="tab" data-tab="learn">解説・年表</button>
+  <button class="tab" data-tab="about">このアプリについて</button>
+</nav>
+
+<main>
+  <!-- ================= SIMULATOR ================= -->
+  <section class="panel-tab active" id="tab-sim">
+    <div class="section-label">1. 対象ファームウェアの年代を選ぶ</div>
+    <div class="era-timeline" id="era-timeline"></div>
+
+    <div class="sim-grid">
+      <!-- target firmware spec -->
+      <div class="card spec-card">
+        <div class="card-title">
+          <span>&#128225; ターゲット端末</span>
+          <span class="spec-version" id="spec-version"></span>
+        </div>
+        <div class="spec-meta" id="spec-meta"></div>
+        <div class="spec-list" id="spec-list"></div>
+      </div>
+
+      <!-- attack library -->
+      <div class="card attack-card">
+        <div class="card-title"><span>&#9876;&#65039; 攻撃手法ライブラリ</span></div>
+        <div class="attack-list" id="attack-list"></div>
+      </div>
+
+      <!-- console / result -->
+      <div class="card console-card">
+        <div class="card-title">
+          <span>&#128421;&#65039; 攻撃コンソール</span>
+          <button class="run-btn" id="run-btn" disabled>&#9654; 実行</button>
+        </div>
+        <div class="attack-brief" id="attack-brief">
+          左の一覧から攻撃手法を選んでください。
+        </div>
+        <div class="terminal" id="terminal">
+          <div class="term-empty">// simulated console — 出力はすべて模擬です</div>
+        </div>
+        <div class="result-banner" id="result-banner" hidden></div>
+        <div class="result-detail" id="result-detail" hidden></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= MATRIX ================= -->
+  <section class="panel-tab" id="tab-matrix">
+    <div class="section-label">年代 &times; 攻撃手法 ＝ 「どの時代に何が効くか」の一覧</div>
+    <p class="matrix-help">セルをクリックすると、その組み合わせをシミュレーターで開きます。</p>
+    <div class="matrix-legend">
+      <span><i class="lg success"></i>成立（攻撃が通る）</span>
+      <span><i class="lg partial"></i>条件つき / 部分的</span>
+      <span><i class="lg failed"></i>失敗（防御されている）</span>
+      <span><i class="lg na"></i>対象外（機能が存在しない）</span>
+    </div>
+    <div class="matrix-wrap"><table class="matrix" id="matrix"></table></div>
+  </section>
+
+  <!-- ================= LEARN ================= -->
+  <section class="panel-tab" id="tab-learn">
+    <div class="section-label">解説・年表</div>
+    <div id="learn-content"></div>
+  </section>
+
+  <!-- ================= ABOUT ================= -->
+  <section class="panel-tab" id="tab-about">
+    <div class="section-label">このアプリについて</div>
+    <div class="about-content">
+      <div class="card">
+        <h3>&#127919; 目的</h3>
+        <p>
+          「自作・古いファームウェアをわざと入れて、過去に悪用された手法を試したい」という探究心はとても良いものです。
+          しかし実機でやると、(1) 改造ファームは<strong>技適</strong>（電波法の技術基準適合）上グレー、
+          (2) 攻撃トラフィックが<strong>外部に漏れる</strong>と重大な問題、というリスクがあります。
+          そこでこのアプリは、<strong>ブラウザの中だけで完結する模擬実験</strong>として、
+          年代の異なるファームウェアに歴史的な攻撃手法を当てて「どうなるか」を安全に観察できるようにしたものです。
+        </p>
+      </div>
+      <div class="card">
+        <h3>&#9989; 安全性（なぜ安心して試せるのか）</h3>
+        <ul>
+          <li>実際のネットワーク通信を<strong>一切行いません</strong>（<code>fetch</code> も <code>WebSocket</code> も未使用）。</li>
+          <li>表示されるコンソール出力・IP・認証情報・脆弱性はすべて<strong>架空の模擬データ</strong>です。</li>
+          <li>そのまま実機に流用できる「動く攻撃コード」は含みません。手法の<strong>仕組みと歴史</strong>を学ぶための再現です。</li>
+          <li>外部サーバーへ送信しないので、課題で扱った<strong>漏洩・技適の懸念が原理的に発生しません</strong>。</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>&#128218; 授業の課題とのつながり</h3>
+        <p>
+          本日の上級課題「自宅ブロードバンドルーターのファームウェアをアップデートしてみよう」は、
+          <em>なぜ更新が大切なのか</em>を体感する課題です。このシミュレーターはその裏返しで、
+          <em>更新せず古いままだと何が起きるのか</em>を年代別に可視化します。
+          マトリクスの左下（古い年代）が赤く、右上（新しい年代）が緑になっていく様子が、そのまま「更新の価値」です。
+        </p>
+      </div>
+      <div class="card">
+        <h3>&#128295; 拡張のしかた（自分で年代・手法を足す）</h3>
+        <ul>
+          <li><code>js/firmwares.js</code> … 年代（ファームウェア）の定義。<code>flags</code> を足し引きするだけで挙動が変わります。</li>
+          <li><code>js/attacks.js</code> … 攻撃手法の定義。<code>evaluate(fw)</code> が成否とコンソール出力を返します。</li>
+          <li>新しいフラグや手法を追加すると、マトリクスにも自動で反映されます。</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>&#129514; モデルの簡略化について</h3>
+        <p>
+          各年代の仕様は、その時代に<strong>典型的だった構成を代表・簡略化したモデル</strong>であり、特定製品の実測値ではありません。
+          実際には同じ年代でも機種・メーカーで差があります（例：Wi-Fi暗号方式やTelnetの有無）。
+          攻撃の成否は「その性質を持つ機器なら原理的にどうなるか」を示すもので、
+          史実の年号・研究者・事件・CVEは「解説・年表」タブと各結果の記述に基づいています。
+        </p>
+      </div>
+      <div class="card disclaimer">
+        <h3>&#9888;&#65039; 注意</h3>
+        <p>
+          ここで学ぶ手法を、<strong>自分が管理していない機器やネットワークに対して使うことは違法</strong>です
+          （不正アクセス禁止法など）。学習・研究は、必ず<strong>自分の所有物・許可を得た環境・本物に触れない模擬環境</strong>で行ってください。
+        </p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="app-footer">
+  社会情報学実習 #1 サイバーセキュリティ &mdash; 教育目的のオフライン・シミュレーター
+</footer>
+
+<script src="js/firmwares.js" charset="utf-8"></script>
+<script src="js/attacks.js" charset="utf-8"></script>
+<script src="js/app.js" charset="utf-8"></script>
+</body>
+</html>
