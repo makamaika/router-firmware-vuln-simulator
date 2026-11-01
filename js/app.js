@@ -106,6 +106,7 @@ function renderAttackList(){
 /* ====================== 選択ハンドラ ====================== */
 function selectEra(id){
   runToken++;                       // 実行中アニメを無効化
+  $("#run-btn").disabled = !state.atkId;
   state.eraId = id;
   const fw = getFw(id);
   $$("#era-timeline .era").forEach((el,i)=>el.classList.toggle("selected", FIRMWARES[i].id===id));
